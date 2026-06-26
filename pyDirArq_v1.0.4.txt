@@ -1,13 +1,18 @@
 #===================================================================================================
-# Programa : pyDirArq_v1.0.0.py
-# Descrição: apresenta arquivos e subdiretórios de um diretorio totalizando o tamanho dos arquivos e
+# Programa : pyDirArq_v1.0.4.py
+# Descrição: salva arquivos e subdiretórios de um diretorio totalizando o tamanho dos arquivos e
 # subdiretórios.
 #---------------------------------------------------------------------------------------------------
-# Data : 22/06/2026 seg
+# Data : 23/06/2026 ter
 #---------------------------------------------------------------------------------------------------
 # Utilização: 
 # 
 #---------------------------------------------------------------------------------------------------
+# Versão 1.0.4 - apresenta a raíz a cada iteração do loop for: 
+# 'for raiz, dirs, arquivos in os.walk(pathDir_)'; usa "Estou vivo";
+# Versão 1.0.3 - apresenta os subdiretórios e arquivos de todos os níveis;
+# Versão 1.0.2 - apresenta os subdiretórios e arquivos do Nível1;
+# Versão 1.0.1 - apresenta os subdiretórios e arquivos;
 # Versão 1.0.0 - versão inicial;
 #===================================================================================================
 
@@ -118,118 +123,92 @@ def printStyled(text, fg=None, bg=None, bold=False, underline=False):
     print(f"{bg_code}{fg_code}{style_code}{text}{Style.RESET_ALL}")
     #-----------------------------------------------------------------
 
-#-------------------------------------------------------------------------------
-# Função : analisa o diretório e apresenta o tamanho dos arquivos e subdiretórios
-#-------------------------------------------------------------------------------
-def analisar_diretorio(caminho):
-
-    printStyled(f'\n{"TAMANHO":>12}  {"SUBDIRETÓRIO"}\n{"="*50}', fg='CYAN')
-    total_geral = 0
-
-    for raiz, dirs, arquivos in os.walk(caminho):
-        soma_dir = 0
-        for arq in arquivos:
-            try:
-                soma_dir += os.path.getsize(os.path.join(raiz, arq))
-            except OSError:
-                continue
-
-        if soma_dir > 0:
-            print(f'{soma_dir:>12,} bytes  {raiz}')
-            total_geral += soma_dir
-
-    printStyled(f'{"="*50}', fg='CYAN')
-    printStyled(f'{total_geral:>12,} bytes  TOTAL ({caminho})', fg='CYAN')
-
 #===================================================================================================
 # Função principal
 #===================================================================================================
-def main(pathDir_, pathArqRels_): 
+def main(pathDir_, pathDirRels_):
 
-    #--------------------------------------
-    # Instancializações e inicializações
-    #--------------------------------------
-    global ScriptName
-    ScriptName = os.path.basename(__file__)
+    total_geral = 0
+    intNivel    = 1
 
-    ararArquivos = []
-    ararSubdirs  = []
+    flag_debug_Raiz = True
+    if (flag_debug_Raiz):
+        msgDebug   = ""
+        #total_Raiz = 1
 
-    totalFileSize   = 0.0
-    totalSubdirSize = 0.0
+    elif flag_debug:
+        printStyled(f'\n{"TAMANHO":>12}  {"SUBDIRETÓRIO"}\n{"="*50}', fg='CYAN')
 
-    dataHora         = PreparaDataHora('%y%m%d%H%M%S')
-    strRelatorioTxt  = f"Relatorio_{dataHora}.txt"
-    pathRelatorioTxt = os.path.join(pathArqRels_, strRelatorioTxt)
-    printStyled (f"Relatório a ser gerado: pathRelatorioTxt = '{pathRelatorioTxt}'", fg='YELLOW', bold=True)
+    printStyled(f'\n{"Aguarde o escaneamento ...\n"}', fg='GREEN')
 
-    #-------------------------------------------------------------------------
-    # Escaneia o diretório e armazena os arquivos e subdiretórios em listas
-    #-------------------------------------------------------------------------
-    try:
+    #------------------------------------------------
+    for raiz, dirs, arquivos in os.walk(pathDir_):
+    #------------------------------------------------
 
-        if not os.path.exists(pathDir_):
-            printStyled(f" O diretório '{pathDir_}' não existe.", fg='RED')
-            return
-        
-        if not os.path.exists(pathArqRels_):
-            printStyled(f" O diretório '{pathArqRels_}' não existe.", fg='RED')
-            return
-        
-        #--------------------------------------------
-        for root, dirs, files in os.walk(pathDir_):
-        #--------------------------------------------    
-            for file in files:
-                ararArquivos.append(os.path.join(root, file))
+        ''' Escaneia o diretório e calcula o tamanho dos arquivos e subdiretórios
+        soma_Dirs = 0
+        for dir in dirs:
+            try:
+                tam_dir    = os.path.getsize(os.path.join(raiz, dir))
+                soma_Dirs += tam_dir
+            except OSError:
+                continue
 
-            for dir in dirs:
-                ararSubdirs.append(os.path.join(root, dir))
-    
-    except Exception as e:
+            soma_Arq = 0
+            for arq in arquivos:
+                try:
+                    tam_Arq   = os.path.getsize(os.path.join(raiz, arq))
+                    soma_Arq += tam_Arq
+                except OSError:
+                    continue
 
-        printStyled(f" Erro ao escanear o diretório: {e}", fg='RED')
-        return  
+                if tam_Arq > 0:
+                    print(f'{arq} {tam_Arq:>12,} bytes')
+                    total_geral += soma_Arq
+        '''
 
-    #----------------------------------------------------
-    # Apresenta as listas dos arquivos e subdiretórios
-    #----------------------------------------------------
-    if flag_debug:
-        printStyled(f'- tam_ararArquivos = {len(ararArquivos)} ítens', fg='CYAN')
-        printStyled(f'- tam_ararSubdirs  = {len(ararSubdirs)} ítens', fg='CYAN')
+        if (flag_debug and not flag_debug_Raiz):
 
-    if len(ararArquivos) == 0:
-        printStyled(f"O diretório '{pathDir_}' não contém arquivos.", fg='RED')
-    else:
-        printStyled("\n-->Arquivos encontrados em '{pathDir_}':", fg='GREEN')
-        for arquivo in ararArquivos:
-            print(f"  {arquivo}")
+            printStyled(f'nivel = {intNivel} - {raiz}', fg='GREEN')
 
-    if len(ararSubdirs) == 0:
-        printStyled(f"O diretório '{pathDir_}' não contém subdiretórios.", fg='RED')
-    else:
-        printStyled("\n--> Subdiretórios encontrados em '{pathDir_}':", fg='GREEN')
-        for subdiretorio in ararSubdirs:
-            print(f"  {subdiretorio}")
-  
+            printStyled(f'-Qtidd Subdir   = {len(dirs)}', fg='YELLOW')
+            print (f'dirs     = {dirs}')
+            printStyled(f'-Qtidd Arquivos = {len(arquivos)}', fg='YELLOW')
+            print (f'arquivos = {arquivos}\n')
+
+        elif flag_debug_Raiz:
+
+            #total_Raiz += {len(raiz)}
+            msgTmp      = f'\nnivel = {intNivel} - {raiz}'
+            msgDebug   += msgTmp
+
+        intNivel += 1
+
+    #--- Finalização do escaneamento
+    if (flag_debug and not flag_debug_Raiz):
+        printStyled(f'{"="*50}', fg='CYAN')
+        printStyled(f'{total_geral:>12,} bytes  TOTAL ({pathDir_})', fg='CYAN')
+    elif flag_debug_Raiz:
+        printStyled(f'Raízes a cada nível:\n{msgDebug}', fg='YELLOW')
+
 #===================================================================================================
 # Ponto de entrada do programa
 #===================================================================================================
 if __name__ == '__main__':
 
     strDir  = filedialog.askdirectory(title = "Selecione o diretório a ser processado:").replace('/', '\\')
-    printStyled (f"\nDiretório a ser processado: strDir = '{strDir}'", fg='CYAN')
+    printStyled (f"\nDiretório a ser processado: strDir = '{strDir}'", fg='GREEN')
     pathDir = Path(strDir)
 
     strDirRels = filedialog.askdirectory(title = "Selecione o diretório para salvar os arquivos-relatórios:").replace('/', '\\')
-    printStyled (f"Diretório para salvar os arquivos-relatórios: strDirRels = '{strDirRels}'", fg='CYAN')
+    printStyled (f"Diretório para salvar os arquivos-relatórios: strDirRels = '{strDirRels}'", fg='GREEN')
     pathDirRels = Path(strDirRels)
 
     #----------------------------
-    #main(pathDir, pathDirRels)
-    analisar_diretorio(pathDir)
+    main(pathDir, pathDirRels)
     #----------------------------
 
 # Fim do programa
 
 #===================================================================================================
-# Fim do arquivo pyDirArq_v1.0.0.py
+# Fim do arquivo pyDirArq_v1.0.4.py

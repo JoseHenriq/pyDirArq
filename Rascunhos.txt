@@ -1,0 +1,602 @@
+
+---------------------------------------------------------------------------------------------------------------
+
+Versão 1.0.6 - correção do nível para qtidd de '\' no path;
+Versão 1.0.5 - adicionado ao script 1.0.4 "EstouVivo";
+Versão 1.0.4 - apresenta a raíz a cada iteração do loop for: 'for raiz, dirs, arquivos in os.walk(pathDir_)'
+Versão 1.0.3 - apresenta os subdiretórios e arquivos de todos os níveis;
+Versão 1.0.2 - apresenta os subdiretórios e arquivos do Nível1;
+Versão 1.0.1 - apresenta os subdiretórios e arquivos;
+Versão 1.0.0 - versão inicial;
+
+---------------------------------------------------------------------------------------------------------------
+
+VSCode-Win11x64-Python-Panda-Openpyxl:
+
+- elaborar o script 'pandaOpenpyxl.py' que utilize Panda + openpyxl para uma tabela para Excel com as funções CRUD.
+
+A tabela terá o nome: tabDados.xlsx e será utilizada à partir da célula B2, com as seguintes coluna:
+
+iteração, nivel, subnivel, raiz, pathAbs
+
+---------------------------------------------------------------------------------------------------------------
+Diretório a ser processado: strDir = 'P:\'
+Diretório para salvar os arquivos-relatórios: strDirRels = 'P:\Logs\Tst02'
+
+Aguarde o escaneamento ...
+
+⏳ Escaneando... |  [00:00:00]▶️  Estou vivo ATIVADO — Escaneando diretório
+⏹️  Estou vivo DESATIVADO — decorridos: [00:59:35] 
+Raízes a cada nível:
+
+iteracao=0001 nivel=00-raiz=P:\
+iteracao=0002 nivel=00-raiz=P:\!Repo
+iteracao=0003 nivel=00-raiz=P:\$Recycle.Bin
+iteracao=0004 nivel=01-raiz=    P:\$Recycle.Bin\S-1-5-21-2331002977-4089960731-1713720761-1003
+iteracao=0005 nivel=00-raiz=P:\4DefaultTempSaveScan
+iteracao=0006 nivel=00-raiz=P:\Entretenimento
+iteracao=0007 nivel=01-raiz=    P:\Entretenimento\Filmes
+iteracao=0008 nivel=02-raiz=        P:\Entretenimento\Filmes\American Gods
+iteracao=0009 nivel=03-raiz=            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E01.HDTV.x264-FLEET[rarbg]
+iteracao=0010 nivel=03-raiz=            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E02.WEBRip.XviD-FUM[ettv]
+iteracao=0011 nivel=03-raiz=            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E03.HDTV.x264-FLEET[rarbg]
+iteracao=0012 nivel=03-raiz=            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E04.WEBRip.X264-DEFLATE[ettv]
+iteracao=0013 nivel=04-raiz=                P:\Entretenimento\Filmes\American Gods\American.Gods.S01E04.WEBRip.X264-DEFLATE[ettv]\American_Gods_span_HDTV_720p_1080p_span_span_S01E04_span_
+iteracao=0014 nivel=03-raiz=            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E05.WEBRip.X264-DEFLATE[rarbg]
+iteracao=0015 nivel=03-raiz=            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E06.WEBRip.x264-FS
+iteracao=0016 nivel=03-raiz=            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E07.WEBRip.x264-FS
+iteracao=0017 nivel=03-raiz=            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E08.WEBRip.x264-FS
+iteracao=0018 nivel=02-raiz=        P:\Entretenimento\Filmes\Capitão Fantástico
+iteracao=0019 nivel=02-raiz=        P:\Entretenimento\Filmes\Captain.Fantastic.2016.720p.BRRip.x264.AAC-ETRG
+iteracao=0020 nivel=02-raiz=        P:\Entretenimento\Filmes\Enemy (2013)
+iteracao=0021 nivel=02-raiz=        P:\Entretenimento\Filmes\Funny Girl(1968)
+iteracao=0022 nivel=03-raiz=            P:\Entretenimento\Filmes\Funny Girl(1968)\Subs
+iteracao=0023 nivel=02-raiz=        P:\Entretenimento\Filmes\Game of Thrones
+iteracao=0024 nivel=03-raiz=            P:\Entretenimento\Filmes\Game of Thrones\Game.of.Thrones.S06E02.PROPER.720p.HDTV.x264-BATV[ettv]
+iteracao=0025 nivel=03-raiz=            P:\Entretenimento\Filmes\Game of Thrones\Game.of.Thrones.S07E02.WEB.h264-TBS[ettv]
+iteracao=0026 nivel=02-raiz=        P:\Entretenimento\Filmes\Girls
+iteracao=0027 nivel=03-raiz=            P:\Entretenimento\Filmes\Girls\Girls.S05E01.720p.HDTV.x264-KILLERS[ettv]
+iteracao=0028 nivel=03-raiz=            P:\Entretenimento\Filmes\Girls\Girls.S05E02.HDTV.x264-KILLERS[ettv]
+iteracao=0029 nivel=03-raiz=            P:\Entretenimento\Filmes\Girls\[ www.torrenting.com ] - Girls.S05E03.HDTV.x264-FLEET
+iteracao=0030 nivel=02-raiz=        P:\Entretenimento\Filmes\Handmaids Tale
+iteracao=0031 nivel=03-raiz=            P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]
+iteracao=0032 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\5558903
+iteracao=0033 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The.Handmaids.Tale.S01E05.WEBRip.RARBG.en_2
+iteracao=0034 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E01_span_
+iteracao=0035 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E02_span_
+iteracao=0036 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E03_span_
+iteracao=0037 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E04_span_
+iteracao=0038 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E06_span_
+iteracao=0039 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E07_span_
+iteracao=0040 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E08_span_
+iteracao=0041 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E09_span_
+iteracao=0042 nivel=04-raiz=                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E10_span_
+iteracao=0043 nivel=02-raiz=        P:\Entretenimento\Filmes\La.casa.de.papel.S02.1080p.NF.WEB-DL.AAC2.0.x264-WWW.COMANDOTORRENTS.COM
+iteracao=0044 nivel=03-raiz=            P:\Entretenimento\Filmes\La.casa.de.papel.S02.1080p.NF.WEB-DL.AAC2.0.x264-WWW.COMANDOTORRENTS.COM\Episódio 1
+iteracao=0045 nivel=02-raiz=        P:\Entretenimento\Filmes\Moonlight
+iteracao=0046 nivel=03-raiz=            P:\Entretenimento\Filmes\Moonlight\Captain.Fantastic.2016.720p.BRRip.x264.AAC-ETRG
+iteracao=0047 nivel=03-raiz=            P:\Entretenimento\Filmes\Moonlight\Moonlight.2016.BRRip.XViD-ETRG
+iteracao=0048 nivel=02-raiz=        P:\Entretenimento\Filmes\No (2012)
+iteracao=0049 nivel=02-raiz=        P:\Entretenimento\Filmes\Oscar 2018
+iteracao=0050 nivel=02-raiz=        P:\Entretenimento\Filmes\Outlander
+iteracao=0051 nivel=03-raiz=            P:\Entretenimento\Filmes\Outlander\Outlander.S03E01.WEB.H264-STRiFE[ettv]
+iteracao=0052 nivel=03-raiz=            P:\Entretenimento\Filmes\Outlander\Outlander.S03E02.WEB.H264-STRiFE[ettv]
+iteracao=0053 nivel=03-raiz=            P:\Entretenimento\Filmes\Outlander\Outlander.S03E05.720p.WEB.H264-STRiFE[ettv]
+iteracao=0054 nivel=03-raiz=            P:\Entretenimento\Filmes\Outlander\Outlander.S03E11.720p.WEB.H264-STRiFE[ettv]
+iteracao=0055 nivel=03-raiz=            P:\Entretenimento\Filmes\Outlander\Outlander.S04E07.WEBRip.x264-RARBG
+iteracao=0056 nivel=02-raiz=        P:\Entretenimento\Filmes\Outlander.S03E11.WEB.H264-STRiFE[ettv]
+iteracao=0057 nivel=02-raiz=        P:\Entretenimento\Filmes\Outlander.S03E12.WEB.H264-STRiFE[rarbg]
+iteracao=0058 nivel=02-raiz=        P:\Entretenimento\Filmes\Outlander.S03E13.WEB.H264-STRiFE[rarbg]
+iteracao=0059 nivel=02-raiz=        P:\Entretenimento\Filmes\Rogue One A Star Wars Story 2016 HD-TS x264-CPG
+iteracao=0060 nivel=02-raiz=        P:\Entretenimento\Filmes\The Handmaiden (2016) BluRay 720p x264 875MB (nItRo)-XpoZ
+iteracao=0061 nivel=03-raiz=            P:\Entretenimento\Filmes\The Handmaiden (2016) BluRay 720p x264 875MB (nItRo)-XpoZ\Screens Cap
+iteracao=0062 nivel=02-raiz=        P:\Entretenimento\Filmes\Wonder.Woman.2017.1080p.WEB-DL.DD5.1.H264-STRiFE
+iteracao=0063 nivel=01-raiz=    P:\Entretenimento\Musicas
+iteracao=0064 nivel=02-raiz=        P:\Entretenimento\Musicas\Internacionais
+iteracao=0065 nivel=02-raiz=        P:\Entretenimento\Musicas\Nacionais
+iteracao=0066 nivel=01-raiz=    P:\Entretenimento\Vídeos
+iteracao=0067 nivel=02-raiz=        P:\Entretenimento\Vídeos\Internacionais
+iteracao=0068 nivel=03-raiz=            P:\Entretenimento\Vídeos\Internacionais\Clips
+iteracao=0069 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Adele
+iteracao=0070 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\Adele\2011- Adele no Royal Albert Hall
+iteracao=0071 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Blues
+iteracao=0072 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Boston
+iteracao=0073 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\Boston\YouTube - Tom Scholz (Boston) Interview 1988
+iteracao=0074 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Deep Purple
+iteracao=0075 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Elvis
+iteracao=0076 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Eric Clapton
+iteracao=0077 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\FlashDance
+iteracao=0078 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\George
+iteracao=0079 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Inxs
+iteracao=0080 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Jeff Beck
+iteracao=0081 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\Jeff Beck\aac
+iteracao=0082 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Jimi Hendrix
+iteracao=0083 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\John Lennon
+iteracao=0084 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\John Lennon\Morte
+iteracao=0085 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Johnny Rivers
+iteracao=0086 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\Johnny Rivers\Repositorio
+iteracao=0087 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\KingCrimson
+iteracao=0088 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Ladies
+iteracao=0089 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\Ladies\AAC
+iteracao=0090 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney
+iteracao=0091 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\!Repo
+iteracao=0092 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\120209-Live Kisses On the Bottom
+iteracao=0093 nivel=06-raiz=                        P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\120209-Live Kisses On the Bottom\Disc1
+iteracao=0094 nivel=07-raiz=                            P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\120209-Live Kisses On the Bottom\Disc1\VIDEO_TS
+iteracao=0095 nivel=06-raiz=                        P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\120209-Live Kisses On the Bottom\Paul McCartney - Live Kisses-alE13
+iteracao=0096 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\121212-The Concert for Sandy Relief
+iteracao=0097 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\1997- Oprah
+iteracao=0098 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Phil Collins
+iteracao=0099 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Seal
+iteracao=0100 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\Seal\!Repo
+iteracao=0101 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\Slash
+iteracao=0102 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\StevieRayVaughn
+iteracao=0103 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\TeasForFears
+iteracao=0104 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\The Animals
+iteracao=0105 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\The Band
+iteracao=0106 nivel=04-raiz=                P:\Entretenimento\Vídeos\Internacionais\Clips\The Beatles
+iteracao=0107 nivel=05-raiz=                    P:\Entretenimento\Vídeos\Internacionais\Clips\The Beatl
+---> Fim do programa.
+PS F:\Tools\Diretorios> 
+
+
+
+https://share.google/aimode/GvzXhWFcD31C80YwF
+
+PROMPT
+------
+Inserir o estilo Spinner da classe EstouVivo no script abaixo 'pyDirArq_v1.0.4.txt' : 
+
+SCRIPT
+------
+#===================================================================================================
+# Programa : pyDirArq_v1.0.4.py
+# Descrição: salva arquivos e subdiretórios de um diretorio totalizando o tamanho dos arquivos e
+# subdiretórios.
+#---------------------------------------------------------------------------------------------------
+# Data : 23/06/2026 ter
+#---------------------------------------------------------------------------------------------------
+# Utilização: 
+# 
+#---------------------------------------------------------------------------------------------------
+# Versão 1.0.4 - apresenta a raíz a cada iteração do loop for: 
+# 'for raiz, dirs, arquivos in os.walk(pathDir_)'; usa "Estou vivo";
+# Versão 1.0.3 - apresenta os subdiretórios e arquivos de todos os níveis;
+# Versão 1.0.2 - apresenta os subdiretórios e arquivos do Nível1;
+# Versão 1.0.1 - apresenta os subdiretórios e arquivos;
+# Versão 1.0.0 - versão inicial;
+#===================================================================================================
+
+#===================================================================================================
+# Imports
+#===================================================================================================
+import os
+import datetime
+from pathlib import Path
+from tkinter import filedialog
+
+from colorama import Back, Fore, Style, init
+init()    # Initialize colorama (required for Windows)
+
+#-------------------------------------------------------------------------------
+# Instancializações e inicializações
+#-------------------------------------------------------------------------------
+flag_debug = True #False
+
+#===================================================================================================
+# Funções 
+#===================================================================================================
+#-------------------------------------------------------------------------------
+# Função : lê a data e hora do sistema e formata para o padrão brasileiro
+# entrada: formatoDataHora; ex: '%d/%m/%y %H:%M:%S %a' "17/10/23 Ter 06:27:00" 
+# (%a = dia da semana abreviado, ex: Ter)
+# saída  : data e hora formatada
+#-------------------------------------------------------------------------------
+def PreparaDataHora(formatoDataHora):
+    
+    # Dicionário para converter o dia da semana de inglês para português
+    dias_da_semana = {
+        'Mon': 'Seg',
+        'Tue': 'Ter',
+        'Wed': 'Qua',
+        'Thu': 'Qui',
+        'Fri': 'Sex',
+        'Sat': 'Sáb',
+        'Sun': 'Dom'
+    }
+
+    #---------------------------------------------------------------------
+    data_hora_atual = datetime.datetime.now().strftime(formatoDataHora)
+    #---------------------------------------------------------------------
+
+    # Se o formato da data e hora contiver o dia da semana (%a), substitui o dia da semana em inglês pelo dia da semana em português
+    if ('%a' in formatoDataHora) :
+        dia_da_semana   = data_hora_atual[-3:]                   # extrai os últimos 3 caracteres (%a)
+        dia_da_semana   = dias_da_semana [dia_da_semana]         # converte para o dia da semana em português
+        data_hora_atual = data_hora_atual[:-3] + dia_da_semana   
+
+    if ('%f' in formatoDataHora) :
+        data_hora_atual = data_hora_atual[:-3]
+
+    return data_hora_atual
+
+#-------------------------------------------------------------------------------
+# Apresentação das mensagens com estilos ajustáveis
+#-------------------------------------------------------------------------------
+def printStyled(text, fg=None, bg=None, bold=False, underline=False):
+
+    """
+    Prints styled colored text to the terminal.
+    Args:
+        text (str) : Text to print;
+        fg (str)   : Foreground color: 'BLACK', 'RED', 'GREEN', 'YELLOW', 'BLUE', 'MAGENTA', 'CYAN', 'WHITE'. Default: 'WHITE'.
+        bg (str)   : Background color: same options as fg. Default: None (no change).
+        bold (bool): If True, text is bold.
+        underline (bool): If True, text is underlined.
+    """
+
+    #--- Color maps
+    # Foreground
+    COLORS_FG = {
+        'BLACK'  : Fore.BLACK,
+        'RED'    : Fore.RED,
+        'GREEN'  : Fore.GREEN,
+        'YELLOW' : Fore.YELLOW,
+        'BLUE'   : Fore.BLUE,
+        'MAGENTA': Fore.MAGENTA,
+        'CYAN'   : Fore.CYAN,
+        'WHITE'  : Fore.WHITE,
+    }
+    # Background
+    COLORS_BG = {
+        'BLACK'  : Back.BLACK,
+        'RED'    : Back.RED,
+        'GREEN'  : Back.GREEN,
+        'YELLOW' : Back.YELLOW,
+        'BLUE'   : Back.BLUE,
+        'MAGENTA': Back.MAGENTA,
+        'CYAN'   : Back.CYAN,
+        'WHITE'  : Back.WHITE,
+    }
+
+    # Defaults
+    fg_code = COLORS_FG.get(fg, Fore.WHITE)
+    bg_code = COLORS_BG.get(bg, '')
+    style_code = ''
+    if bold:
+        style_code += Style.BRIGHT
+    if underline:
+        # ANSI underline is not well supported in all terminals, but we can try
+        style_code += '\033[4m'
+
+    # Print styled text
+    #-----------------------------------------------------------------
+    print(f"{bg_code}{fg_code}{style_code}{text}{Style.RESET_ALL}")
+    #-----------------------------------------------------------------
+
+#===================================================================================================
+# Função principal
+#===================================================================================================
+def main(pathDir_, pathDirRels_):
+
+    total_geral = 0
+    intNivel    = 1
+
+    flag_debug_Raiz = True
+    if (flag_debug_Raiz):
+        msgDebug   = ""
+        #total_Raiz = 1
+
+    elif flag_debug:
+        printStyled(f'\n{"TAMANHO":>12}  {"SUBDIRETÓRIO"}\n{"="*50}', fg='CYAN')
+
+    printStyled(f'\n{"Aguarde o escaneamento ...\n"}', fg='GREEN')
+
+    #------------------------------------------------
+    for raiz, dirs, arquivos in os.walk(pathDir_):
+    #------------------------------------------------
+
+        ''' Escaneia o diretório e calcula o tamanho dos arquivos e subdiretórios
+        soma_Dirs = 0
+        for dir in dirs:
+            try:
+                tam_dir    = os.path.getsize(os.path.join(raiz, dir))
+                soma_Dirs += tam_dir
+            except OSError:
+                continue
+
+            soma_Arq = 0
+            for arq in arquivos:
+                try:
+                    tam_Arq   = os.path.getsize(os.path.join(raiz, arq))
+                    soma_Arq += tam_Arq
+                except OSError:
+                    continue
+
+                if tam_Arq > 0:
+                    print(f'{arq} {tam_Arq:>12,} bytes')
+                    total_geral += soma_Arq
+        '''
+
+        if (flag_debug and not flag_debug_Raiz):
+
+            printStyled(f'nivel = {intNivel} - {raiz}', fg='GREEN')
+
+            printStyled(f'-Qtidd Subdir   = {len(dirs)}', fg='YELLOW')
+            print (f'dirs     = {dirs}')
+            printStyled(f'-Qtidd Arquivos = {len(arquivos)}', fg='YELLOW')
+            print (f'arquivos = {arquivos}\n')
+
+        elif flag_debug_Raiz:
+
+            #total_Raiz += {len(raiz)}
+            msgTmp      = f'\nnivel = {intNivel} - {raiz}'
+            msgDebug   += msgTmp
+
+        intNivel += 1
+
+    #--- Finalização do escaneamento
+    if (flag_debug and not flag_debug_Raiz):
+        printStyled(f'{"="*50}', fg='CYAN')
+        printStyled(f'{total_geral:>12,} bytes  TOTAL ({pathDir_})', fg='CYAN')
+    elif flag_debug_Raiz:
+        printStyled(f'Raízes a cada nível:\n{msgDebug}', fg='YELLOW')
+
+#===================================================================================================
+# Ponto de entrada do programa
+#===================================================================================================
+if __name__ == '__main__':
+
+    strDir  = filedialog.askdirectory(title = "Selecione o diretório a ser processado:").replace('/', '\\')
+    printStyled (f"\nDiretório a ser processado: strDir = '{strDir}'", fg='GREEN')
+    pathDir = Path(strDir)
+
+    strDirRels = filedialog.askdirectory(title = "Selecione o diretório para salvar os arquivos-relatórios:").replace('/', '\\')
+    printStyled (f"Diretório para salvar os arquivos-relatórios: strDirRels = '{strDirRels}'", fg='GREEN')
+    pathDirRels = Path(strDirRels)
+
+    #----------------------------
+    main(pathDir, pathDirRels)
+    #----------------------------
+
+# Fim do programa
+
+#===================================================================================================
+# Fim do arquivo pyDirArq_v1.0.4.py
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+Raízes a cada nível:
+
+nivel = 1 - P:\
+nivel = 2 - P:\!Repo
+nivel = 3 - P:\$Recycle.Bin
+nivel = 4 -     P:\$Recycle.Bin\S-1-5-21-2331002977-4089960731-1713720761-1003
+nivel = 5 - P:\4DefaultTempSaveScan
+nivel = 6 - P:\Entretenimento
+nivel = 7 -     P:\Entretenimento\Filmes
+nivel = 8 -         P:\Entretenimento\Filmes\American Gods
+nivel = 9 -             P:\Entretenimento\Filmes\American Gods\American.Gods.S01E01.HDTV.x264-FLEET[rarbg]
+nivel = 10 -            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E02.WEBRip.XviD-FUM[ettv]
+nivel = 11 -            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E03.HDTV.x264-FLEET[rarbg]
+nivel = 12 -            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E04.WEBRip.X264-DEFLATE[ettv]
+nivel = 13 -            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E04.WEBRip.X264-DEFLATE[ettv]\American_Gods_span_HDTV_720p_1080p_span_span_S01E04_span_
+nivel = 14 -            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E05.WEBRip.X264-DEFLATE[rarbg]
+nivel = 15 -            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E06.WEBRip.x264-FS
+nivel = 16 -            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E07.WEBRip.x264-FS
+nivel = 17 -            P:\Entretenimento\Filmes\American Gods\American.Gods.S01E08.WEBRip.x264-FS
+nivel = 18 -        P:\Entretenimento\Filmes\Capitão Fantástico
+nivel = 19 -        P:\Entretenimento\Filmes\Captain.Fantastic.2016.720p.BRRip.x264.AAC-ETRG
+nivel = 20 -        P:\Entretenimento\Filmes\Enemy (2013)
+nivel = 21 -        P:\Entretenimento\Filmes\Funny Girl(1968)
+nivel = 22 -            P:\Entretenimento\Filmes\Funny Girl(1968)\Subs
+nivel = 23 -        P:\Entretenimento\Filmes\Game of Thrones
+nivel = 24 -            P:\Entretenimento\Filmes\Game of Thrones\Game.of.Thrones.S06E02.PROPER.720p.HDTV.x264-BATV[ettv]
+nivel = 25 -            P:\Entretenimento\Filmes\Game of Thrones\Game.of.Thrones.S07E02.WEB.h264-TBS[ettv]
+nivel = 26 -        P:\Entretenimento\Filmes\Girls
+nivel = 27 -            P:\Entretenimento\Filmes\Girls\Girls.S05E01.720p.HDTV.x264-KILLERS[ettv]
+nivel = 28 -            P:\Entretenimento\Filmes\Girls\Girls.S05E02.HDTV.x264-KILLERS[ettv]
+nivel = 29 -            P:\Entretenimento\Filmes\Girls\[ www.torrenting.com ] - Girls.S05E03.HDTV.x264-FLEET
+nivel = 30 -            P:\Entretenimento\Filmes\Handmaids Tale
+nivel = 31 -                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]
+nivel = 32 -                    P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\5558903
+nivel = 33 -                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The.Handmaids.Tale.S01E05.WEBRip.RARBG.en_2
+nivel = 34 -                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E01_span_
+nivel = 35 -                P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E02_span_
+nivel = 36 - P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E03_span_
+nivel = 37 - P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E04_span_
+nivel = 38 - P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E06_span_
+nivel = 39 - P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E07_span_
+nivel = 40 - P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E08_span_
+nivel = 41 - P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E09_span_
+nivel = 42 - P:\Entretenimento\Filmes\Handmaids Tale\The Handmaids Tale Season 1 Complete 720p HDTV x264 [i_c]\The_Handmaid_s_Tale_span_HDTV_720p_1080p_span_span_S01E10_span_
+nivel = 43 - P:\Entretenimento\Filmes\La.casa.de.papel.S02.1080p.NF.WEB-DL.AAC2.0.x264-WWW.COMANDOTORRENTS.COM
+nivel = 44 - P:\Entretenimento\Filmes\La.casa.de.papel.S02.1080p.NF.WEB-DL.AAC2.0.x264-WWW.COMANDOTORRENTS.COM\Episódio 1
+nivel = 45 - P:\Entretenimento\Filmes\Moonlight
+nivel = 46 - P:\Entretenimento\Filmes\Moonlight\Captain.Fantastic.2016.720p.BRRip.x264.AAC-ETRG
+nivel = 47 - P:\Entretenimento\Filmes\Moonlight\Moonlight.2016.BRRip.XViD-ETRG
+nivel = 48 - P:\Entretenimento\Filmes\No (2012)
+nivel = 49 - P:\Entretenimento\Filmes\Oscar 2018
+nivel = 50 - P:\Entretenimento\Filmes\Outlander
+nivel = 51 - P:\Entretenimento\Filmes\Outlander\Outlander.S03E01.WEB.H264-STRiFE[ettv]
+nivel = 52 - P:\Entretenimento\Filmes\Outlander\Outlander.S03E02.WEB.H264-STRiFE[ettv]
+nivel = 53 - P:\Entretenimento\Filmes\Outlander\Outlander.S03E05.720p.WEB.H264-STRiFE[ettv]
+nivel = 54 - P:\Entretenimento\Filmes\Outlander\Outlander.S03E11.720p.WEB.H264-STRiFE[ettv]
+nivel = 55 - P:\Entretenimento\Filmes\Outlander\Outlander.S04E07.WEBRip.x264-RARBG
+nivel = 56 - P:\Entretenimento\Filmes\Outlander.S03E11.WEB.H264-STRiFE[ettv]
+nivel = 57 - P:\Entretenimento\Filmes\Outlander.S03E12.WEB.H264-STRiFE[rarbg]
+nivel = 58 - P:\Entretenimento\Filmes\Outlander.S03E13.WEB.H264-STRiFE[rarbg]
+nivel = 59 - P:\Entretenimento\Filmes\Rogue One A Star Wars Story 2016 HD-TS x264-CPG
+nivel = 60 - P:\Entretenimento\Filmes\The Handmaiden (2016) BluRay 720p x264 875MB (nItRo)-XpoZ
+nivel = 61 - P:\Entretenimento\Filmes\The Handmaiden (2016) BluRay 720p x264 875MB (nItRo)-XpoZ\Screens Cap
+nivel = 62 - P:\Entretenimento\Filmes\Wonder.Woman.2017.1080p.WEB-DL.DD5.1.H264-STRiFE
+nivel = 63 - P:\Entretenimento\Musicas
+nivel = 64 - P:\Entretenimento\Musicas\Internacionais
+nivel = 65 - P:\Entretenimento\Musicas\Nacionais
+nivel = 66 - P:\Entretenimento\Vídeos
+nivel = 67 - P:\Entretenimento\Vídeos\Internacionais
+nivel = 68 - P:\Entretenimento\Vídeos\Internacionais\Clips
+nivel = 69 - P:\Entretenimento\Vídeos\Internacionais\Clips\Adele
+nivel = 70 - P:\Entretenimento\Vídeos\Internacionais\Clips\Adele\2011- Adele no Royal Albert Hall
+nivel = 71 - P:\Entretenimento\Vídeos\Internacionais\Clips\Blues
+nivel = 72 - P:\Entretenimento\Vídeos\Internacionais\Clips\Boston
+nivel = 73 - P:\Entretenimento\Vídeos\Internacionais\Clips\Boston\YouTube - Tom Scholz (Boston) Interview 1988
+nivel = 74 - P:\Entretenimento\Vídeos\Internacionais\Clips\Deep Purple
+nivel = 75 - P:\Entretenimento\Vídeos\Internacionais\Clips\Elvis
+nivel = 76 - P:\Entretenimento\Vídeos\Internacionais\Clips\Eric Clapton
+nivel = 77 - P:\Entretenimento\Vídeos\Internacionais\Clips\FlashDance
+nivel = 78 - P:\Entretenimento\Vídeos\Internacionais\Clips\George
+nivel = 79 - P:\Entretenimento\Vídeos\Internacionais\Clips\Inxs
+nivel = 80 - P:\Entretenimento\Vídeos\Internacionais\Clips\Jeff Beck
+nivel = 81 - P:\Entretenimento\Vídeos\Internacionais\Clips\Jeff Beck\aac
+nivel = 82 - P:\Entretenimento\Vídeos\Internacionais\Clips\Jimi Hendrix
+nivel = 83 - P:\Entretenimento\Vídeos\Internacionais\Clips\John Lennon
+nivel = 84 - P:\Entretenimento\Vídeos\Internacionais\Clips\John Lennon\Morte
+nivel = 85 - P:\Entretenimento\Vídeos\Internacionais\Clips\Johnny Rivers
+nivel = 86 - P:\Entretenimento\Vídeos\Internacionais\Clips\Johnny Rivers\Repositorio
+nivel = 87 - P:\Entretenimento\Vídeos\Internacionais\Clips\KingCrimson
+nivel = 88 - P:\Entretenimento\Vídeos\Internacionais\Clips\Ladies
+nivel = 89 - P:\Entretenimento\Vídeos\Internacionais\Clips\Ladies\AAC
+nivel = 90 - P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney
+nivel = 91 - P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\!Repo
+nivel = 92 - P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\120209-Live Kisses On the Bottom
+nivel = 93 - P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\120209-Live Kisses On the Bottom\Disc1
+nivel = 94 - P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\120209-Live Kisses On the Bottom\Disc1\VIDEO_TS
+nivel = 95 - P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\120209-Live Kisses On the Bottom\Paul McCartney - Live Kisses-alE13
+nivel = 96 - P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\121212-The Concert for Sandy Relief
+nivel = 97 - P:\Entretenimento\Vídeos\Internacionais\Clips\Paul McCartney\1997- Oprah
+nivel = 98 - P:\Entretenimento\Vídeos\Internacionais\Clips\Phil Collins
+nivel = 99 - P:\Entretenimento\Vídeos\Internacionais\Clips\Seal
+nivel = 100 - P:\Entretenimento\Vídeos\Internacionais\Clips\Seal\!Repo
+nivel = 101 - P:\Entretenimento\Vídeos\Internacionais\Clips\Slash
+nivel = 102 - P:\Entretenimento\Vídeos\Internacionais\Clips\StevieRayVaughn
+nivel = 103 - P:\Entretenimento\Vídeos\Internacionais\Clips\TeasForFears
+nivel = 104 - P:\Entretenimento\Vídeos\Internacionais\Clips\The Animals
+nivel = 105 - P:\Entretenimento\Vídeos\Internacionais\Clips\The Band
+nivel = 106 - P:\Entretenimento\Vídeos\Internacionais\Clips\The Beatles
+nivel = 107 - P:\Entretenimento\Vídeos\Internacionais\Clips\The Beatles\02- Love - full album
+nivel = 108 - P:\Entretenimento\Vídeos\Internacionais\Clips\The Beatles\99- Repositório
+nivel = 109 - P:\Entretenimento\Vídeos\Internacionais\Clips\The Beatles\TheBeatlesRockBand
+nivel = 110 - P:\Entretenimento\Vídeos\Internacionais\Clips\The Carpenters
+nivel = 111 - P:\Entretenimento\Vídeos\Internacionais\Clips\The Doors
+nivel = 112 - P:\Entretenimento\Vídeos\Internacionais\Clips\The MamasAndThePapas
+nivel = 113 - P:\Entretenimento\Vídeos\Internacionais\Clips\Van Halen
+nivel = 114 - P:\Entretenimento\Vídeos\Internacionais\Clips\Whitesnake
+nivel = 115 - P:\Entretenimento\Vídeos\Internacionais\Clips\ZZTop
+nivel = 116 - P:\Entretenimento\Vídeos\Internacionais\Shows
+nivel = 117 - P:\Entretenimento\Vídeos\Internacionais\Shows\01- Katy Perry
+nivel = 118 - P:\Entretenimento\Vídeos\Internacionais\Shows\02- Red Hot Chili Peppers
+nivel = 119 - P:\Entretenimento\Vídeos\Internacionais\Shows\03- Snow Patrol
+nivel = 120 - P:\Entretenimento\Vídeos\Internacionais\Shows\05- Joss Stone
+nivel = 121 - P:\Entretenimento\Vídeos\Internacionais\Shows\06- Cold Play
+nivel = 122 - P:\Entretenimento\Vídeos\Internacionais\Shows\07- Evanescence
+nivel = 123 - P:\Entretenimento\Vídeos\Internacionais\Shows\08- Metallica
+nivel = 124 - P:\Entretenimento\Vídeos\Internacionais\Shows\08- Metallica\DVD1
+nivel = 125 - P:\Entretenimento\Vídeos\Internacionais\Shows\08- Metallica\DVD1\VIDEO_TS
+nivel = 126 - P:\Entretenimento\Vídeos\Internacionais\Shows\08- Metallica\DVD2
+nivel = 127 - P:\Entretenimento\Vídeos\Internacionais\Shows\08- Metallica\DVD2\VIDEO_TS
+nivel = 128 - P:\Entretenimento\Vídeos\Internacionais\Shows\09- MotorHead
+nivel = 129 - P:\Entretenimento\Vídeos\Internacionais\Shows\09- MotorHead\VIDEO_TS
+nivel = 130 - P:\Entretenimento\Vídeos\Internacionais\Shows\10- Pitty
+nivel = 131 - P:\Entretenimento\Vídeos\Internacionais\Shows\11- Rihanna
+nivel = 132 - P:\Entretenimento\Vídeos\Internacionais\Shows\1968- Farewell Concert -BBC-TV
+nivel = 133 - P:\Entretenimento\Vídeos\Internacionais\Shows\Chuck Berry
+nivel = 134 - P:\Entretenimento\Vídeos\Internacionais\Shows\Chuck Berry\Chucky Berry 60 anos
+nivel = 135 - P:\Entretenimento\Vídeos\Internacionais\Shows\Chuck Berry\Chucky Berry 60 anos\Disc1
+nivel = 136 - P:\Entretenimento\Vídeos\Internacionais\Shows\Chuck Berry\Chucky Berry 60 anos\Disc1\VIDEO_TS
+nivel = 137 - P:\Entretenimento\Vídeos\Internacionais\Shows\Chuck Berry\Chucky Berry 60 anos\Disc2
+nivel = 138 - P:\Entretenimento\Vídeos\Internacionais\Shows\Chuck Berry\Chucky Berry 60 anos\Disc2\VIDEO_TS
+nivel = 139 - P:\Entretenimento\Vídeos\Internacionais\Shows\Corrompidos
+nivel = 140 - P:\Entretenimento\Vídeos\Internacionais\Shows\Corrompidos\ChickenFoot
+nivel = 141 - P:\Entretenimento\Vídeos\Internacionais\Shows\Custard
+nivel = 142 - P:\Entretenimento\Vídeos\Internacionais\Shows\Deep Purple BBC Radio2
+nivel = 143 - P:\Entretenimento\Vídeos\Internacionais\Shows\Deep Purple BBC 
+PS F:\Tools\Diretorios> 
+
+
+
+PS F:\Tools\Diretorios>  & 'c:\Users\JOSEHENRIQ1956\AppData\Local\Python\pythoncore-3.14-64\python.exe' 'c:\Users\JOSEHENRIQ1956\.vscode\extensions\ms-python.debugpy-2026.6.0-win32-x64\bundled\libs\debugpy\launcher' '64788' '--' 'F:\Tools\Diretorios\pyDirArq\pyDirArq_v1.0.2.py' 
+
+Diretório a ser processado: strDir = 'P:\'
+Diretório para salvar os arquivos-relatórios: strDirRels = 'P:\Logs\Tst02'
+Diretorio: !Repo                                                 0 bytes
+Diretorio: $Recycle.Bin                                          0 bytes
+Diretorio: 4DefaultTempSaveScan                                  0 bytes
+Diretorio: Arquivos de Programas                             8.192 bytes
+Diretorio: Documents and Settings                            4.096 bytes
+Diretorio: Entretenimento                                        0 bytes
+Diretorio: Estudos                                               0 bytes
+Diretorio: Financeiro                                            0 bytes
+Diretorio: GreenShot                                             0 bytes
+Diretorio: inetpub                                               0 bytes
+Diretorio: Intel                                                 0 bytes
+Diretorio: Logs                                                  0 bytes
+Diretorio: Mapas                                                 0 bytes
+Diretorio: Meus Documentos                                       0 bytes
+Diretorio: MSOCache                                              0 bytes
+Diretorio: OneDriveTemp                                          0 bytes
+Diretorio: PerfLogs                                              0 bytes
+Diretorio: Profissionais                                         0 bytes
+Diretorio: Program Files                                         0 bytes
+Diretorio: Program Files (x86)                                   0 bytes
+Diretorio: ProgramData                                           0 bytes
+Diretorio: Recovery                                              0 bytes
+Diretorio: System Volume Information                             0 bytes
+Diretorio: Tools                                                 0 bytes
+Diretorio: Users                                                 0 bytes
+Diretorio: Windows                                               0 bytes
+Arquivo  : DumpStack.log                                    12.288 bytes
+Arquivo  : DumpStack.log.tmp                                12.288 bytes
+Arquivo  : hiberfil.sys                              6.754.017.280 bytes
+Arquivo  : pagefile.sys                              4.294.967.296 bytes
+Arquivo  : swapfile.sys                                 16.777.216 bytes
+strTotalstr = 11065798656
+================================================================================
+                                       TOTAL (P:\): 11.065.798.656 bytes
+================================================================================
+Fim do processamento
+PS F:\Tools\Diretorios> 
+
+
+
+PS F:\Tools\Diretorios>  & 'c:\Users\JOSEHENRIQ1956\AppData\Local\Python\pythoncore-3.14-64\python.exe' 'c:\Users\JOSEHENRIQ1956\.vscode\extensions\ms-python.debugpy-2026.6.0-win32-x64\bundled\libs\debugpy\launcher' '60135' '--' 'F:\Tools\Diretorios\pyDirArq\pyDirArq_v1.0.2.py' 
+
+Diretório a ser processado: strDir = 'P:\'
+Diretório para salvar os arquivos-relatórios: strDirRels = 'P:\Logs\Tst02'
+Diretorio: !Repo                                                 0 bytes
+Diretorio: $Recycle.Bin                                          0 bytes
+Diretorio: 4DefaultTempSaveScan                                  0 bytes
+Diretorio: Arquivos de Programas                              8192 bytes
+Diretorio: Documents and Settings                             4096 bytes
+Diretorio: Entretenimento                                        0 bytes
+Diretorio: Estudos                                               0 bytes
+Diretorio: Financeiro                                            0 bytes
+Diretorio: GreenShot                                             0 bytes
+Diretorio: inetpub                                               0 bytes
+Diretorio: Intel                                                 0 bytes
+Diretorio: Logs                                                  0 bytes
+Diretorio: Mapas                                                 0 bytes
+Diretorio: Meus Documentos                                       0 bytes
+Diretorio: MSOCache                                              0 bytes
+Diretorio: OneDriveTemp                                          0 bytes
+Diretorio: PerfLogs                                              0 bytes
+Diretorio: Profissionais                                         0 bytes
+Diretorio: Program Files                                         0 bytes
+Diretorio: Program Files (x86)                                   0 bytes
+Diretorio: ProgramData                                           0 bytes
+Diretorio: Recovery                                              0 bytes
+Diretorio: System Volume Information                             0 bytes
+Diretorio: Tools                                                 0 bytes
+Diretorio: Users                                                 0 bytes
+Diretorio: Windows                                               0 bytes
+Arquivo  : DumpStack.log                                     12288 bytes
+Arquivo  : DumpStack.log.tmp                                 12288 bytes
+Arquivo  : hiberfil.sys                                 6754017280 bytes
+Arquivo  : pagefile.sys                                 4294967296 bytes
+Arquivo  : swapfile.sys                                   16777216 bytes
+================================================================================
+                                       TOTAL (P:\): 11,065,798,656 bytes
+================================================================================
+Fim do processamento
+PS F:\Tools\Diretorios> 
