@@ -1,4 +1,1864 @@
 
+-------------------------------------------------------------------------------------------------
+
+    '''
+    def _save_table_new(self, df: pd.DataFrame):
+
+        #--- Atualiza a planilha Excel com, eventualmente, novo df
+        # 1- colunas
+        if list(df.columns) != self.COLUMNS:
+            df = df[self.COLUMNS]
+        #-------------------------------------
+        wb = load_workbook(self.EXCEL_FILE)
+        #-------------------------------------
+        # 2- linhas
+        ws      = wb[self.SHEET_NAME]
+        max_row = ws.max_row
+        # 3- limpa os conteúdos da planilha atual
+        for row in range(self.START_ROW + 1, max_row + 1):
+            for col in range(self.START_COL, self.START_COL + len(self.COLUMNS)):
+                ws.cell(row=row, column=col).value = None
+        # 4- armazena os dados atuais na planilha
+        for i, (_, row_data) in enumerate(df.iterrows(), start=self.START_ROW + 1):
+
+            #--- DEBUG: mostra o que está vindo do DataFrame
+            print(f'Linha {i}:')
+            for col in self.COLUMNS:
+                valor_bruto = row_data[col]  # acesso direto, sem .get()
+                print(f'  coluna "{col}" = {repr(valor_bruto)} (tipo: {type(valor_bruto).__name__})')
+
+            for j, col in enumerate(self.COLUMNS, start=self.START_COL):
+
+                # Pega o valor bruto
+                valor = row_data[col]
+                
+                # Trata explicitamente: se for NaN ou None, vira 0
+                if valor is None or (isinstance(valor, float) and pd.isna(valor)):
+                    valor = 0
+                
+                # Garante que 0 seja inteiro, não float
+                if isinstance(valor, float) and valor == int(valor):
+                    valor = int(valor)
+                
+                ws.cell(row=i, column=j, value=valor)
+
+        #--- Salva a planilha Excel atualizada no arquivo (workbook) Excel
+        wb.save(self.EXCEL_FILE)
+    '''
+
+-------------------------------------------------------------------------------------------------
+
+''' Função 2: Criar nova sheet no workbook '''
+
+'''
+def criar_nova_sheet(workbook, nome_nova_sheet, df=None):
+
+    #Cria uma nova planilha no workbook especificado.
+    #Opcionalmente, insere dados de um DataFrame.
+    #
+    #Args:
+    #    workbook (str): Caminho do arquivo .xlsx
+    #    nome_nova_sheet (str): Nome da nova planilha
+    #    df (pd.DataFrame, opcional): Dados para inserir na nova sheet
+    
+    #Retorna:
+    #    bool: True se criou com sucesso, False caso contrário
+
+    try:
+        # Carrega o workbook existente
+        wb = load_workbook(workbook)
+        
+        # Verifica se a sheet já existe
+        if nome_nova_sheet in wb.sheetnames:
+            print(f'Sheet "{nome_nova_sheet}" já existe no workbook.')
+            return False
+        
+        # Cria a nova sheet
+        wb.create_sheet(title=nome_nova_sheet)
+        
+        # Se um DataFrame foi fornecido, insere os dados
+        if df is not None:
+            ws = wb[nome_nova_sheet]
+            
+            # Insere o cabeçalho
+            for col_idx, col_name in enumerate(df.columns, 1):
+                ws.cell(row=1, column=col_idx, value=col_name)
+            
+            # Insere os dados
+            for row_idx, row in df.iterrows():
+                for col_idx, value in enumerate(row, 1):
+                    ws.cell(row=row_idx + 2, column=col_idx, value=value)
+        
+        # Salva o workbook
+        wb.save(workbook)
+        print(f'Sheet "{nome_nova_sheet}" criada com sucesso em "{workbook}".')
+        return True
+        
+    except FileNotFoundError:
+        print(f'Workbook "{workbook}" não encontrado.')
+        return False
+    except Exception as e:
+        print(f'Erro ao criar sheet: {e}')
+        return False
+
+'''        
+
+'''
+# 
+# Exemplo de uso
+# 
+if __name__ == '__main__':
+    WORKBOOK = 'tabPyDirArq_001.xlsx'
+    SHEET    = 'Sheet1'
+    INTERVALO = 'B4:F20'
+    COLUNA_ORDENAR = 'subnivel'
+    
+    # 1) Classifica os dados
+    df_classificado = classificar_por_coluna(WORKBOOK, SHEET, INTERVALO, COLUNA_ORDENAR)
+    
+    # 2) Cria uma nova sheet com os dados classificados
+    criar_nova_sheet(WORKBOOK, 'Classificado', df_classificado)
+    
+    # 3) Cria uma nova sheet vazia
+    criar_nova_sheet(WORKBOOK, 'Resumo')
+'''
+
+-------------------------------------------------------------------------------------------------
+
+''' Função 1: Classificar registros por coluna (ascendente)
+# 
+def classificar_por_coluna(workbook, sheet, intervalo, coluna_ordenar):
+    
+    """
+    Classifica os registros de uma planilha Excel por uma coluna específica (ascendente).
+    
+    Args:
+        workbook (str) : Caminho do arquivo .xlsx
+        sheet (str)    : Nome da planilha
+        intervalo (str): Intervalo de células (ex: 'B4:F20')
+        coluna_ordenar (str): Nome da coluna para classificar
+    
+    Retorna:
+        pd.DataFrame: DataFrame com os dados classificados
+    """
+    # Lê o intervalo especificado
+    df = pd.read_excel(workbook, sheet_name=sheet, header=None)
+    
+    # Pula as 3 primeiras linhas (cabeçalho) e pega as linhas de dados
+    # Como o intervalo começa em B4, as 3 primeiras linhas são cabeçalho
+    df_dados = df.iloc[3:19, 1:6]  # B=1, C=2, D=3, E=4, F=5 (0-indexed)
+    
+    # Define os nomes das colunas
+    df_dados.columns = ['iteração', 'nivel', 'subnivel', 'raiz', 'pathRelativo']
+    
+    # Remove linhas totalmente vazias
+    df_dados = df_dados.dropna(how='all')
+    
+    # Converte a coluna 'subnivel' para numérico (se possível)
+    df_dados['subnivel'] = pd.to_numeric(df_dados['subnivel'], errors='coerce')
+    
+    #-----------------------------------------------------------------------
+    # Classifica pela coluna especificada (ascendente)
+    df_ordenado = df_dados.sort_values(by=coluna_ordenar, ascending=True)
+    
+    # Reseta o índice
+    df_ordenado = df_ordenado.reset_index(drop=True)
+    #-----------------------------------------------------------------------
+    
+    print(f'Registros classificados por "{coluna_ordenar}" (ascendente):')
+    print(f'Total de registros: {len(df_ordenado)}')
+    print(df_ordenado.to_string(index=False))
+    
+    return df_ordenado
+'''
+
+-------------------------------------------------------------------------------------------------
+
+*** DEBUG
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+⏳ Escaneando... -  [00:00:07]Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 11:
+  coluna "iteração" = 8 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 11:
+  coluna "iteração" = 8 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+Linha 12:
+  coluna "iteração" = 9 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 11:
+  coluna "iteração" = 8 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+Linha 12:
+  coluna "iteração" = 9 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+Linha 13:
+  coluna "iteração" = 10 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 11:
+  coluna "iteração" = 8 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+Linha 12:
+  coluna "iteração" = 9 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+Linha 13:
+  coluna "iteração" = 10 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+Linha 14:
+  coluna "iteração" = 11 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo250927' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo250927' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 11:
+  coluna "iteração" = 8 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+Linha 12:
+  coluna "iteração" = 9 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+Linha 13:
+  coluna "iteração" = 10 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+Linha 14:
+  coluna "iteração" = 11 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo250927' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo250927' (tipo: str)
+Linha 15:
+  coluna "iteração" = 12 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251001' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251001' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 11:
+  coluna "iteração" = 8 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+Linha 12:
+  coluna "iteração" = 9 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+Linha 13:
+  coluna "iteração" = 10 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+Linha 14:
+  coluna "iteração" = 11 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo250927' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo250927' (tipo: str)
+Linha 15:
+  coluna "iteração" = 12 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251001' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251001' (tipo: str)
+Linha 16:
+  coluna "iteração" = 13 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251020' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251020' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 11:
+  coluna "iteração" = 8 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+Linha 12:
+  coluna "iteração" = 9 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+Linha 13:
+  coluna "iteração" = 10 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+Linha 14:
+  coluna "iteração" = 11 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo250927' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo250927' (tipo: str)
+Linha 15:
+  coluna "iteração" = 12 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251001' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251001' (tipo: str)
+Linha 16:
+  coluna "iteração" = 13 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251020' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251020' (tipo: str)
+Linha 17:
+  coluna "iteração" = 14 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251105' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251105' (tipo: str)
+⏳ Escaneando... \  [00:00:07]Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 11:
+  coluna "iteração" = 8 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+Linha 12:
+  coluna "iteração" = 9 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+Linha 13:
+  coluna "iteração" = 10 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+Linha 14:
+  coluna "iteração" = 11 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo250927' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo250927' (tipo: str)
+Linha 15:
+  coluna "iteração" = 12 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251001' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251001' (tipo: str)
+Linha 16:
+  coluna "iteração" = 13 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251020' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251020' (tipo: str)
+Linha 17:
+  coluna "iteração" = 14 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251105' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251105' (tipo: str)
+Linha 18:
+  coluna "iteração" = 15 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251201' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251201' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 11:
+  coluna "iteração" = 8 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+Linha 12:
+  coluna "iteração" = 9 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+Linha 13:
+  coluna "iteração" = 10 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+Linha 14:
+  coluna "iteração" = 11 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo250927' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo250927' (tipo: str)
+Linha 15:
+  coluna "iteração" = 12 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251001' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251001' (tipo: str)
+Linha 16:
+  coluna "iteração" = 13 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251020' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251020' (tipo: str)
+Linha 17:
+  coluna "iteração" = 14 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251105' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251105' (tipo: str)
+Linha 18:
+  coluna "iteração" = 15 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251201' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251201' (tipo: str)
+Linha 19:
+  coluna "iteração" = 16 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\Logs' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\Logs' (tipo: str)
+Linha 4:
+  coluna "iteração" = 1 (tipo: int)
+  coluna "nivel" = 3 (tipo: int)
+  coluna "subnivel" = 0 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo' (tipo: str)
+  coluna "pathRelativo" = '.' (tipo: str)
+Linha 5:
+  coluna "iteração" = 2 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1' (tipo: str)
+Linha 6:
+  coluna "iteração" = 3 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo' (tipo: str)
+Linha 7:
+  coluna "iteração" = 4 (tipo: int)
+  coluna "nivel" = 6 (tipo: int)
+  coluna "subnivel" = 3 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8' (tipo: str)
+Linha 8:
+  coluna "iteração" = 5 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\!Repo' (tipo: str)
+Linha 9:
+  coluna "iteração" = 6 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin' (tipo: str)
+Linha 10:
+  coluna "iteração" = 7 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\bin\\Debug' (tipo: str)
+Linha 11:
+  coluna "iteração" = 8 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj' (tipo: str)
+Linha 12:
+  coluna "iteração" = 9 (tipo: int)
+  coluna "nivel" = 8 (tipo: int)
+  coluna "subnivel" = 5 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\obj\\Debug' (tipo: str)
+Linha 13:
+  coluna "iteração" = 10 (tipo: int)
+  coluna "nivel" = 7 (tipo: int)
+  coluna "subnivel" = 4 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo\\Vers1.1.1.8\\Properties' (tipo: str)
+Linha 14:
+  coluna "iteração" = 11 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo250927' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo250927' (tipo: str)
+Linha 15:
+  coluna "iteração" = 12 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251001' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251001' (tipo: str)
+Linha 16:
+  coluna "iteração" = 13 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251020' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251020' (tipo: str)
+Linha 17:
+  coluna "iteração" = 14 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251105' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251105' (tipo: str)
+Linha 18:
+  coluna "iteração" = 15 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\!Repo251201' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\!Repo251201' (tipo: str)
+Linha 19:
+  coluna "iteração" = 16 (tipo: int)
+  coluna "nivel" = 5 (tipo: int)
+  coluna "subnivel" = 2 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\CopiaDiretorio.1\\Logs' (tipo: str)
+  coluna "pathRelativo" = 'CopiaDiretorio.1\\Logs' (tipo: str)
+Linha 20:
+  coluna "iteração" = 17 (tipo: int)
+  coluna "nivel" = 4 (tipo: int)
+  coluna "subnivel" = 1 (tipo: int)
+  coluna "raiz" = 'F:\\Tools\\Diretorios\\!Repo\\Logs' (tipo: str)
+  coluna "pathRelativo" = 'Logs' (tipo: str)
+⏹️  Estou vivo DESATIVADO — decorridos: [00:00:07] 
+
+def _save_table_new(self, df: pd.DataFrame):
+
+    #--- Atualiza a planilha Excel com, eventualmente, novo df
+    # 1- colunas
+    if list(df.columns) != self.COLUMNS:
+        df = df[self.COLUMNS]
+    #-------------------------------------
+    wb = load_workbook(self.EXCEL_FILE)
+    #-------------------------------------
+    # 2- linhas
+    ws      = wb[self.SHEET_NAME]
+    max_row = ws.max_row
+    # 3- limpa os conteúdos da planilha atual
+    for row in range(self.START_ROW + 1, max_row + 1):
+        for col in range(self.START_COL, self.START_COL + len(self.COLUMNS)):
+            ws.cell(row=row, column=col).value = None
+    # 4- armazena os dados atuais na planilha
+    for i, (_, row_data) in enumerate(df.iterrows(), start=self.START_ROW + 1):
+
+        #--- DEBUG: mostra o que está vindo do DataFrame
+        print(f'Linha {i}:')
+        for col in self.COLUMNS:
+            valor_bruto = row_data[col]  # acesso direto, sem .get()
+            print(f'  coluna "{col}" = {repr(valor_bruto)} (tipo: {type(valor_bruto).__name__})')
+
+        for j, col in enumerate(self.COLUMNS, start=self.START_COL):
+
+            # Pega o valor bruto
+            valor = row_data[col]
+            
+            # Trata explicitamente: se for NaN ou None, vira 0
+            if valor is None or (isinstance(valor, float) and pd.isna(valor)):
+                valor = 0
+            
+            # Garante que 0 seja inteiro, não float
+            if isinstance(valor, float) and valor == int(valor):
+                valor = int(valor)
+            
+            ws.cell(row=i, column=j, value=valor)
+
+    #--- Salva a planilha Excel atualizada no arquivo (workbook) Excel
+    wb.save(self.EXCEL_FILE)
+
+#--- Cria tabela
+def create(self, records: List[Dict[str, Any]]):
+    df     = self._read_table()
+    new_df = pd.DataFrame(records)
+    if not set(new_df.columns).issubset(set(self.COLUMNS)):
+        raise ValueError(f"Colunas inválidas. Permitido: {self.COLUMNS}")
+    for col in self.COLUMNS:
+        if col not in new_df.columns:
+            new_df[col] = None
+    new_df     = new_df[self.COLUMNS]
+    updated_df = pd.concat([df, new_df], ignore_index=True) if len(df) > 0 else new_df
+    self._save_table(updated_df)
+
+#--- Lê tabela
+def read(self, filters: Optional[Dict[str, Any]] = None) -> pd.DataFrame:
+    df = self._read_table()
+    if filters:
+        mask = pd.Series([True] * len(df))
+        for col, val in filters.items():
+            if col in self.COLUMNS:
+                mask &= (df[col] == val)
+        df = df[mask].reset_index(drop=True)
+    return df
+
+#--- Atualiza tabela
+def update(self, filters: Dict[str, Any], new_values: Dict[str, Any]):
+    df   = self._read_table()
+    mask = pd.Series([True] * len(df))
+    for col, val in filters.items():
+        if col in self.COLUMNS:
+            mask &= (df[col] == val)
+    if not mask.any():
+        print("Nenhum registro encontrado para atualizar.")
+        return
+    for col, new_val in new_values.items():
+        if col in self.COLUMNS:
+            df.loc[mask, col] = new_val
+    self._save_table(df)
+
+#--- Deleta registro
+def delete(self, filters: Dict[str, Any]):
+    df   = self._read_table()
+    mask = pd.Series([True] * len(df))
+    for col, val in filters.items():
+        if col in self.COLUMNS:
+            mask &= (df[col] == val)
+    if not mask.any():
+        print("Nenhum registro encontrado para deletar.")
+        return
+    updated_df = df[~mask].reset_index(drop=True)
+    self._save_table(updated_df)
+
+#--- Apresenta a tabela no console.
+def print_table(self):
+    df = self._read_table()
+    if df.empty:
+        print("Tabela vazia.")
+    else:
+        print(df.to_string(index=False))
+
+------------------------------------------------------------------------------------------------------------------------------------------   
+
+def _save_table_original(self, df: pd.DataFrame):
+
+    #--- Atualiza a planilha Excel com, eventualmente, novo df
+    # 1- colunas
+    if list(df.columns) != self.COLUMNS:
+        df = df[self.COLUMNS]
+    #-------------------------------------
+    wb = load_workbook(self.EXCEL_FILE)
+    #-------------------------------------
+    # 2- linhas
+    ws      = wb[self.SHEET_NAME]
+    max_row = ws.max_row
+    # 3- limpa os conteúdos da planilha atual
+    for row in range(self.START_ROW + 1, max_row + 1):
+        for col in range(self.START_COL, self.START_COL + len(self.COLUMNS)):
+            ws.cell(row=row, column=col).value = None
+    # 4- armazena os dados atuais na planilha
+    for i, (_, row_data) in enumerate(df.iterrows(), start=self.START_ROW + 1):
+
+        for j, col in enumerate(self.COLUMNS, start=self.START_COL):
+
+            # .get() com fallback para 0 — resolve o problema do valor 0 e de chave ausente
+            ws.cell(row=i, column=j, value=row_data.get(col, 0))
+
+    # 5- limpa as células vazias
+    '''
+    current_max_row = self.START_ROW + len(df)
+    for row in range(current_max_row + 1, max_row + 1):
+        for col in range(self.START_COL, self.START_COL + len(self.COLUMNS)):
+            ws.cell(row=row, column=col).value = None
+    '''
+
+    #--- Salva a planilha Excel atualizada no arquivo (workbook) Excel
+    #--------------------------                
+    wb.save(self.EXCEL_FILE)
+    #--------------------------                
+
+------------------------------------------------------------------------------------------------------------------------------------------
+# Escreve uma linha de dados na planilha, preservando o valor 0.
+def _escrever_linha(self, ws, i, row_data):
+    """
+    Args:
+        ws: Worksheet do openpyxl
+        i (int): Número da linha (1-indexed)
+        row_data (dict ou list): Dados da linha
+    """
+    for j, col in enumerate(self.COLUMNS, start=self.START_COL):
+        # Se row_data é dict, usa .get() com default 0
+        if isinstance(row_data, dict):
+            valor = row_data.get(col, 0)
+        # Se row_data é lista, usa índice
+        elif isinstance(row_data, (list, tuple)):
+            idx = self.COLUMNS.index(col)
+            valor = row_data[idx] if idx < len(row_data) else 0
+        else:
+            valor = 0
+        
+        # Garante que 0 seja escrito (não célula vazia)
+        ws.cell(row=i, column=j, value=valor)
+------------------------------------------------------------------------------------------------------------------------------------------
+
+VSCode-Win11x64-Python-Pandas-Openpyxl: 1- codifique uma função que classifique os registros de uma tabela .xlxs tipo ascendente conforme uma das colunas;
+
+- workbook: 'tabPyDirArq_001.xlsx'
+- sheet   : 'Sheet1'
+- dados   : de B4 a F20
+- colunas : "iteração", "nivel", "subnivel", "raiz", "pathRelativo"
+- classificar pela coluna: "subnivel"
+- ordem   : ascendente
+
+2- como crio um novo objeto sheet no workbook 'tabPyDirArq_001.xlsx' ?
+
+------------------------------------------------------------------------------------------------------------------------
+
+Diretório a ser processado: strDir = 'F:\Tools\Diretorios\!Repo'
+Diretório para salvar os arquivos-relatórios: strDirRels = 'F:\Tools\Diretorios\!Repo\Logs'
+
+Aguarde o escaneamento ...
+
+▶️  Estou vivo ATIVADO — Escaneando diretório
+⏹️  Estou vivo DESATIVADO — decorridos: [00:00:00] 
+
+Raízes a cada nível:
+
+iteracao=0001 nivel=02-raiz=        F:\Tools\Diretorios\!Repo
+iteracao=0002 nivel=03-raiz=            F:\Tools\Diretorios\!Repo\CopiaDiretorio.1
+iteracao=0003 nivel=04-raiz=                F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo
+iteracao=0004 nivel=05-raiz=                    F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo\Vers1.1.1.8
+iteracao=0005 nivel=06-raiz=                        F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo\Vers1.1.1.8\!Repo
+iteracao=0006 nivel=06-raiz=                        F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo\Vers1.1.1.8\bin
+iteracao=0007 nivel=07-raiz=                            F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo\Vers1.1.1.8\bin\Debug
+iteracao=0008 nivel=06-raiz=                        F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo\Vers1.1.1.8\obj
+iteracao=0009 nivel=07-raiz=                            F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo\Vers1.1.1.8\obj\Debug
+iteracao=0010 nivel=06-raiz=                        F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo\Vers1.1.1.8\Properties
+iteracao=0011 nivel=04-raiz=                F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo250927
+iteracao=0012 nivel=04-raiz=                F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo251001
+iteracao=0013 nivel=04-raiz=                F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo251020
+iteracao=0014 nivel=04-raiz=                F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo251105
+iteracao=0015 nivel=04-raiz=                F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\!Repo251201
+iteracao=0016 nivel=04-raiz=                F:\Tools\Diretorios\!Repo\CopiaDiretorio.1\Logs
+iteracao=0017 nivel=03-raiz=            F:\Tools\Diretorios\!Repo\Logs
+
+✅ Dados salvos em 'tabPyDirArq_001.xlsx' (tabela a partir de B2)
+---> Fim do programa.
+PS F:\Tools\Diretorios> 
+
+
+# pandaOpenpyxl_v01.py 
+
+--- Teste CRUD com tabDados.xlsx ---
+
+Arquivo 'tabDados.xlsx' criado com cabeçalho.
+3 registro(s) adicionado(s).
+
+--- Tabela após CREATE ---
+ iteração nivel subnivel raiz         pathAbs
+        1     A       A1   C: C:\projetos\foo
+        2     B       B1   D:    D:\dados\bar
+        3     A       A2   C: C:\projetos\baz
+
+--- READ - registros com nivel='A' ---
+ iteração nivel subnivel raiz         pathAbs
+        1     A       A1   C: C:\projetos\foo
+        3     A       A2   C: C:\projetos\baz
+
+--- UPDATE - alterar subnivel='A1' para subnivel='AX' ---
+1 registro(s) atualizado(s).
+ iteração nivel subnivel raiz         pathAbs
+       99     A       AX   C: C:\projetos\foo
+        2     B       B1   D:    D:\dados\bar
+        3     A       A2   C: C:\projetos\baz
+
+--- DELETE - remover registros com nivel='B' ---
+1 registro(s) removido(s).
+ iteração nivel subnivel raiz         pathAbs
+       99     A       AX   C: C:\projetos\foo
+        3     A       A2   C: C:\projetos\baz
+
+--- Operações CRUD concluídas. Verifique o arquivo 'tabDados.xlsx'. ---
+
+PS F:\Tools\Diretorios> 
+
+
+Prompt: 
+
+VSCode-Win11x64-Python: 1- converta o script 'pandaOpenpyxl_v01.py', na classe 'wrapperPandas'; 2- implante-a no script 'pyDirArq_v1.0.6.py', sem alterar nada mais; 3- crie o resultado dessa implantação como 'pyDirArq_v1.0.8.py' e 4- disponibilize-a para download.
+
+
+- script 'pandaOpenpyxl_v01.py:
+
+#===============================================================================
+# Script: pandaOpenpyxl_v0101.py
+# Manipulação de tabela Excel (tabDados.xlsx) com Pandas + Openpyxl
+# Tabela a partir da célula B2 e colunas: iteração, nivel, subnivel, raiz, pathAbs
+# Operações CRUD implementadas.
+#===============================================================================
+import pandas as pd
+import openpyxl
+
+from openpyxl import Workbook, load_workbook
+from openpyxl.utils import get_column_letter
+from pathlib import Path
+from typing import Optional, List, Dict, Any
+
+EXCEL_FILE = "tabDados.xlsx"
+SHEET_NAME = "Sheet1"
+START_ROW  = 2  # linha 2 (B2)
+START_COL  = 2  # coluna B (índice base 1 do openpyxl)
+COLUMNS    = ["iteração", "nivel", "subnivel", "raiz", "pathAbs"]
+
+#-------------------------------------------------------------------------------
+# Cria o arquivo Excel com cabeçalho se não existir.
+#-------------------------------------------------------------------------------
+def ensure_file_exists():
+    path = Path(EXCEL_FILE)
+    if not path.exists():
+        wb = Workbook()
+        ws = wb.active
+        ws.title = SHEET_NAME
+        
+        # Escreve cabeçalho a partir de B2
+        for j, col in enumerate(COLUMNS, start=START_COL):
+            cell = ws.cell(row=START_ROW, column=j, value=col)
+            cell.font = openpyxl.styles.Font(bold=True)
+            # Ajusta largura da coluna
+            ws.column_dimensions[get_column_letter(j)].width = 18
+        
+        # Dá um título à planilha visível
+        ws["A1"] = "Tabela de Dados"
+        ws["A1"].font = openpyxl.styles.Font(bold=True, size=14)
+        
+        wb.save(EXCEL_FILE)
+        print(f"Arquivo '{EXCEL_FILE}' criado com cabeçalho.")
+
+#-------------------------------------------------------------------------------
+# Lê a tabela do Excel para um DataFrame, ignorando cabeçalho e vazios.
+#-------------------------------------------------------------------------------
+def read_table() -> pd.DataFrame:
+
+    ensure_file_exists()
+    
+    wb = load_workbook(EXCEL_FILE, data_only=True)
+    ws = wb[SHEET_NAME]
+    
+    # Encontrar o intervalo de dados (até a última linha preenchida)
+    max_row = ws.max_row
+    data = []
+    # Começa na linha seguinte ao cabeçalho (START_ROW + 1)
+    for row in range(START_ROW + 1, max_row + 1):
+        row_data = []
+        empty_row = True
+        for col in range(START_COL, START_COL + len(COLUMNS)):
+            value = ws.cell(row=row, column=col).value
+            if value is not None:
+                empty_row = False
+            row_data.append(value)
+        # Só adiciona se tiver algum dado na linha
+        if not empty_row:
+            data.append(row_data)
+    
+    df = pd.DataFrame(data, columns=COLUMNS)
+    return df
+
+#-------------------------------------------------------------------------------
+# Salva o DataFrame na tabela a partir de B2, sobrescrevendo dados existentes.
+#-------------------------------------------------------------------------------
+def save_table(df: pd.DataFrame):
+    
+    # Garante que as colunas estão na ordem correta
+    if list(df.columns) != COLUMNS:
+        #------------------
+        df = df[COLUMNS]
+        #------------------
+    
+    wb = load_workbook(EXCEL_FILE)
+    ws = wb[SHEET_NAME]
+    
+    # Limpa dados anteriores (a partir de START_ROW+1 até o fim)
+    max_row = ws.max_row
+    for row in range(START_ROW + 1, max_row + 1):
+        for col in range(START_COL, START_COL + len(COLUMNS)):
+            ws.cell(row=row, column=col).value = None
+    
+    # Escreve os dados
+    for i, (_, row_data) in enumerate(df.iterrows(), start=START_ROW + 1):
+        for j, col in enumerate(COLUMNS, start=START_COL):
+            ws.cell(row=i, column=j, value=row_data[col])
+    
+    # Ajusta a última linha visível (opcional: remove linhas vazias extras)
+    # Pode haver mais linhas do que precisamos após deletar
+    current_max_row = START_ROW + len(df)
+    for row in range(current_max_row + 1, max_row + 1):
+        for col in range(START_COL, START_COL + len(COLUMNS)):
+            ws.cell(row=row, column=col).value = None
+    
+    wb.save(EXCEL_FILE)
+
+#-------------------------------------------------------------------------------
+# Adiciona novos registros à tabela.
+#-------------------------------------------------------------------------------
+def create(records: List[Dict[str, Any]]):
+    df     = read_table()
+    new_df = pd.DataFrame(records)
+    
+    # Valida colunas
+    if not set(new_df.columns).issubset(set(COLUMNS)):
+        raise ValueError(f"Colunas inválidas. Permitido: {COLUMNS}")
+    
+    # Garante todas as colunas presentes
+    for col in COLUMNS:
+        if col not in new_df.columns:
+            new_df[col] = None
+    new_df = new_df[COLUMNS]
+    
+    if len(df) == 0:
+        updated_df = new_df
+    else:
+        updated_df = pd.concat([df, new_df], ignore_index=True)
+    
+    #------------------------
+    save_table(updated_df)
+    #------------------------
+    print(f"{len(records)} registro(s) adicionado(s).")
+
+#-------------------------------------------------------------------------------
+# Lê registros, com filtro opcional por coluna=valor.
+#-------------------------------------------------------------------------------
+def read(filters: Optional[Dict[str, Any]] = None) -> pd.DataFrame:
+    df = read_table()
+    if filters:
+        mask = pd.Series([True] * len(df))
+        for col, val in filters.items():
+            if col in COLUMNS:
+                mask &= (df[col] == val)
+        df = df[mask].reset_index(drop=True)
+    return df
+
+#-------------------------------------------------------------------------------
+# Atualiza registros que correspondam ao filtro com novos valores.
+#-------------------------------------------------------------------------------
+def update(filters: Dict[str, Any], new_values: Dict[str, Any]):
+    
+    df = read_table()
+    
+    # Aplica filtro
+    mask = pd.Series([True] * len(df))
+    for col, val in filters.items():
+        if col in COLUMNS:
+            mask &= (df[col] == val)
+    
+    if not mask.any():
+        print("Nenhum registro encontrado para atualizar.")
+        return
+    
+    # Atualiza os valores
+    for col, new_val in new_values.items():
+        if col in COLUMNS:
+            df.loc[mask, col] = new_val
+    
+    save_table(df)
+    print(f"{mask.sum()} registro(s) atualizado(s).")
+
+#-------------------------------------------------------------------------------
+# Remove registros que correspondem ao filtro.
+#-------------------------------------------------------------------------------
+def delete(filters: Dict[str, Any]):
+    df = read_table()
+    
+    mask = pd.Series([True] * len(df))
+    for col, val in filters.items():
+        if col in COLUMNS:
+            mask &= (df[col] == val)
+    
+    if not mask.any():
+        print("Nenhum registro encontrado para deletar.")
+        return
+    
+    # Mantém apenas os que NÃO correspondem ao filtro
+    updated_df = df[~mask].reset_index(drop=True)
+    save_table(updated_df)
+    print(f"{mask.sum()} registro(s) removido(s).")
+
+#-------------------------------------------------------------------------------
+# Exibe a tabela atual no console.
+#-------------------------------------------------------------------------------
+def print_table():
+    #-------------------
+    df = read_table()
+    #-------------------
+    
+    if df.empty:
+        print("Tabela vazia.")
+    else:
+        print(df.to_string(index=False))
+
+#===============================================================================
+# Ponto de entrada no programa
+#===============================================================================
+if __name__ == "__main__":
+
+    # Exemplo de uso das operações CRUD
+    print("--- Teste CRUD com tabDados.xlsx ---\n")
+
+    #--- CREATE
+    registros = [
+        {"iteração": 1, "nivel": "A", "subnivel": "A1", "raiz": "C:", "pathAbs": "C:\\projetos\\foo"},
+        {"iteração": 2, "nivel": "B", "subnivel": "B1", "raiz": "D:", "pathAbs": "D:\\dados\\bar"},
+        {"iteração": 3, "nivel": "A", "subnivel": "A2", "raiz": "C:", "pathAbs": "C:\\projetos\\baz"},
+    ]
+    #-------------------
+    create(registros)
+    #-------------------
+    
+    print("\n--- Tabela após CREATE ---")
+    print_table()
+
+    #--- READ com filtro
+    print("\n--- READ - registros com nivel='A' ---")
+    #------------------------------------------
+    df_filtro = read(filters={"nivel": "A"})
+    #------------------------------------------
+    print(df_filtro.to_string(index=False))
+
+    #--- UPDATE
+    print("\n--- UPDATE - alterar subnivel='A1' para subnivel='AX' ---")
+    #-----------------------------------------------------------------------------------
+    update(filters={"subnivel": "A1"}, new_values={"subnivel": "AX", "iteração": 99})
+    #-----------------------------------------------------------------------------------
+    print_table()
+
+    #--- DELETE
+    print("\n--- DELETE - remover registros com nivel='B' ---")
+    #--------------------------------
+    delete(filters={"nivel": "B"})
+    #--------------------------------
+    print_table()
+
+    #--- Finaliza o programa
+    print("\n--- Operações CRUD concluídas. Verifique o arquivo 'tabDados.xlsx'. ---")
+
+
+
+- Script 'pyDirArq_v1.0.6.py'
+
+#===================================================================================================
+# Programa : pyDirArq_v1.0.6.py
+# Descrição: salva arquivos e subdiretórios de um diretorio totalizando o tamanho dos arquivos e
+# subdiretórios.
+#---------------------------------------------------------------------------------------------------
+# Data : 23/06/2026 ter
+#---------------------------------------------------------------------------------------------------
+# Utilização: 
+# 
+#---------------------------------------------------------------------------------------------------
+# Versão 1.0.6 - correção do nível para qtidd de '\' no path;
+# Versão 1.0.5 - adicionado ao script 1.0.4 "EstouVivo";
+# Versão 1.0.4 - apresenta a raíz a cada iteração do loop for: 
+# 'for raiz, dirs, arquivos in os.walk(pathDir_)'
+# Versão 1.0.3 - apresenta os subdiretórios e arquivos de todos os níveis;
+# Versão 1.0.2 - apresenta os subdiretórios e arquivos do Nível1;
+# Versão 1.0.1 - apresenta os subdiretórios e arquivos;
+# Versão 1.0.0 - versão inicial;
+#===================================================================================================
+#===================================================================================================
+# Imports
+#===================================================================================================
+import os
+import sys
+import time
+import threading
+import datetime
+from pathlib import Path
+from tkinter import filedialog
+from colorama import Back, Fore, Style, init
+init()    # Initialize colorama (required for Windows)
+#-------------------------------------------------------------------------------
+# Instancializações e inicializações
+#-------------------------------------------------------------------------------
+flag_debug = True #False
+BARRA_VERTICAL = 124   # |
+BARRA          =  47   # /
+TRACO          =  45   # -
+CONTRA_BARRA   =  92   # \
+    
+#===================================================================================================
+# Classe EstouVivo
+#===================================================================================================
+class EstouVivo:
+    """Indicador visual 'estou vivo' para loops demorados."""
+
+    def __init__(self, estilo='spinner'):
+        self.estilo  = estilo
+        self._ativo  = False
+        self._thread = None
+        self._inicio = None
+
+    def _spinner(self):
+        chars = [BARRA_VERTICAL, BARRA, TRACO, CONTRA_BARRA]        
+        i     = 0
+        
+        while self._ativo:
+            elapsed = time.time() - self._inicio
+            sys.stdout.write(f'\r⏳ Escaneando... {chr(chars[i % 4])}  [{time.strftime("%H:%M:%S", time.gmtime(elapsed))}]')
+            sys.stdout.flush()
+            time.sleep(0.2)
+            i += 1
+        sys.stdout.write('\r' + ' ' * 50 + '\r')
+
+        sys.stdout.flush()
+
+    def _pontos(self):
+        i = 0
+        while self._ativo:
+            elapsed = time.time() - self._inicio
+            pontos = '.' * ((i % 6) + 1)
+            sys.stdout.write(f'\r⏳ Escaneando{pontos:<6} [{elapsed:.0f}s]')
+            sys.stdout.flush()
+            time.sleep(0.4)
+            i += 1
+        sys.stdout.write('\r' + ' ' * 50 + '\r')
+        sys.stdout.flush()
+
+    def iniciar(self, mensagem='Escaneando'):
+        """Ativa o indicador. Retorna o próprio objeto para uso com 'with'."""
+        self._inicio = time.time()
+        self._ativo  = True
+        metodo       = self._spinner if self.estilo == 'spinner' else self._pontos
+        self._thread = threading.Thread(target=metodo, daemon=True)
+        self._thread.start()
+        print(f'▶️  Estou vivo ATIVADO — {mensagem}')
+        return self
+
+    def parar(self):
+        """Desativa o indicador."""
+        self._ativo = False
+        if self._thread:
+            self._thread.join(timeout=1)
+        elapsed = time.time() - self._inicio
+        #print(f'⏹️  Estou vivo DESATIVADO — {elapsed:.1f}s decorridos')
+        sys.stdout.write(f'⏹️  Estou vivo DESATIVADO — decorridos: [{time.strftime("%H:%M:%S", time.gmtime(elapsed))}]')
+
+    # Suporte ao gerenciador de contexto (with)
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.parar()
+
+#===================================================================================================
+# Funções 
+#===================================================================================================
+#-------------------------------------------------------------------------------
+# Lê a data e hora do sistema e formata para o padrão especificado na entrada
+#-------------------------------------------------------------------------------
+def PreparaDataHora(formatoDataHora):
+    # Dicionário para converter o dia da semana de inglês para português
+    dias_da_semana = {
+        'Mon': 'Seg',
+        'Tue': 'Ter',
+        'Wed': 'Qua',
+        'Thu': 'Qui',
+        'Fri': 'Sex',
+        'Sat': 'Sáb',
+        'Sun': 'Dom'
+    }
+    #---------------------------------------------------------------------
+    data_hora_atual = datetime.datetime.now().strftime(formatoDataHora)
+    #---------------------------------------------------------------------
+    # Se o formato da data e hora contiver o dia da semana (%a), substitui o dia da semana em inglês pelo dia da semana em português
+    if ('%a' in formatoDataHora) :
+        dia_da_semana   = data_hora_atual[-3:]                   # extrai os últimos 3 caracteres (%a)
+        dia_da_semana   = dias_da_semana [dia_da_semana]         # converte para o dia da semana em português
+        data_hora_atual = data_hora_atual[:-3] + dia_da_semana   
+    if ('%f' in formatoDataHora) :
+        data_hora_atual = data_hora_atual[:-3]
+    return data_hora_atual
+#-------------------------------------------------------------------------------
+# Apresentação das mensagens com estilos ajustáveis
+#-------------------------------------------------------------------------------
+def printStyled(text, fg=None, bg=None, bold=False, underline=False):
+    """
+    Prints styled colored text to the terminal.
+    Args:
+        text (str) : Text to print;
+        fg (str)   : Foreground color: 'BLACK', 'RED', 'GREEN', 'YELLOW', 'BLUE', 'MAGENTA', 'CYAN', 'WHITE'. Default: 'WHITE'.
+        bg (str)   : Background color: same options as fg. Default: None (no change).
+        bold (bool): If True, text is bold.
+        underline (bool): If True, text is underlined.
+    """
+    #--- Color maps
+    # Foreground
+    COLORS_FG = {
+        'BLACK'  : Fore.BLACK,
+        'RED'    : Fore.RED,
+        'GREEN'  : Fore.GREEN,
+        'YELLOW' : Fore.YELLOW,
+        'BLUE'   : Fore.BLUE,
+        'MAGENTA': Fore.MAGENTA,
+        'CYAN'   : Fore.CYAN,
+        'WHITE'  : Fore.WHITE,
+    }
+    # Background
+    COLORS_BG = {
+        'BLACK'  : Back.BLACK,
+        'RED'    : Back.RED,
+        'GREEN'  : Back.GREEN,
+        'YELLOW' : Back.YELLOW,
+        'BLUE'   : Back.BLUE,
+        'MAGENTA': Back.MAGENTA,
+        'CYAN'   : Back.CYAN,
+        'WHITE'  : Back.WHITE,
+    }
+    # Defaults
+    fg_code = COLORS_FG.get(fg, Fore.WHITE)
+    bg_code = COLORS_BG.get(bg, '')
+    style_code = ''
+    if bold:
+        style_code += Style.BRIGHT
+    if underline:
+        # ANSI underline is not well supported in all terminals, but we can try
+        style_code += '\033[4m'
+    # Print styled text
+    #-----------------------------------------------------------------
+    print(f"{bg_code}{fg_code}{style_code}{text}{Style.RESET_ALL}")
+    #-----------------------------------------------------------------
+
+#===================================================================================================
+# Função principal
+#===================================================================================================
+def main(pathDir_, pathDirRels_):
+
+    total_geral = 0
+    intNivel    = 0
+    iteracao    = 1
+
+    flag_debug_Raiz = True
+    if (flag_debug_Raiz):
+        msgDebug = ""
+    elif flag_debug:
+        printStyled(f'\n{"TAMANHO":>12}  {"SUBDIRETÓRIO"}\n{"="*50}', fg='CYAN')
+    printStyled(f'\n{"Aguarde o escaneamento ...\n"}', fg='GREEN')
+    
+    #--- Ativa o indicador "Estou vivo" com spinner
+    with EstouVivo(estilo='spinner').iniciar('Escaneando diretório'):
+        #------------------------------------------------
+        for raiz, dirs, arquivos in os.walk(pathDir_):
+        #------------------------------------------------
+            intNivel = raiz.count('\\') - 1
+            raizfrmt = " "*intNivel*4
+            #print(f'{raizfrmt}{raiz}')
+
+            if (flag_debug and not flag_debug_Raiz):
+                printStyled(f'iteracao={iteracao:04d} nivel={intNivel:02d}-raiz={raizfrmt}', fg='GREEN')
+                printStyled(f'-Qtidd Subdir   = {len(dirs)}', fg='YELLOW')
+                print (f'dirs     = {dirs}')
+                printStyled(f'-Qtidd Arquivos = {len(arquivos)}', fg='YELLOW')
+                print (f'arquivos = {arquivos}\n')
+            elif flag_debug_Raiz:
+                msgTmp    = f'\niteracao={iteracao:04d} nivel={intNivel:02d}-raiz={raizfrmt}{raiz}'
+                msgDebug += msgTmp
+            iteracao += 1
+
+    #--- Finalização do escaneamento
+    if (flag_debug and not flag_debug_Raiz):
+        printStyled(f'{"="*50}', fg='CYAN')
+        printStyled(f'{total_geral:>12,} bytes  TOTAL ({pathDir_})', fg='CYAN')
+    elif flag_debug_Raiz:
+        printStyled(f'\n\nRaízes a cada nível:\n{msgDebug}', fg='YELLOW')
+
+    return
+
+#===================================================================================================
+# Ponto de entrada do programa
+#===================================================================================================
+if __name__ == '__main__':
+    #--- Seleção pelo usuário do diretório a ser processado
+    strDir  = filedialog.askdirectory(title = "Selecione o diretório a ser processado:").replace('/', '\\')
+    printStyled (f"\nDiretório a ser processado: strDir = '{strDir}'", fg='GREEN')
+    pathDir = Path(strDir)
+    #--- Seleção pelo usuário do diretório a ser utilizado para salvamento dos relatórios
+    strDirRels = filedialog.askdirectory(title = "Selecione o diretório para salvar os arquivos-relatórios:").replace('/', '\\')
+    printStyled (f"Diretório para salvar os arquivos-relatórios: strDirRels = '{strDirRels}'", fg='GREEN')
+    pathDirRels = Path(strDirRels)
+    #--- Ativa a função Principal
+    #----------------------------
+    main(pathDir, pathDirRels)
+    #----------------------------
+
+#===================================================================================================
+# Fim do programa
+#===================================================================================================
+printStyled("---> Fim do programa.", fg="GREEN")    
+exit(0)
+
+#===================================================================================================
+# Fim do arquivo pyDirArq_v1.0.6.py
+
+
+
 ---------------------------------------------------------------------------------------------------------------
 
 Versão 1.0.6 - correção do nível para qtidd de '\' no path;
