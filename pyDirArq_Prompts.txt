@@ -1,0 +1,141 @@
+------------------------------------------------------------------------------------------------------------------------
+Procedimento para preparar o ambiente virtual para o projeto.
+------------------------------------------------------------------------------------------------------------------------
+# 1- abra um terminal PowerShell (não precisa ser admin) e rode:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+Responda R (Sim) qdo perguntado
+
+# 2. Remover o venv antigo
+Remove-Item -Recurse -Force .venv
+
+# 3- no diretório raíz do projeto, no Terminal, criar o venv:
+python -m venv .venv
+
+# 4- atualizar o pip dentro do ambiente virtual
+python -m pip install --upgrade pip
+
+# 5- Criar o sub-diretório .vscode
+
+# 6- para ativar o ambiente virtual:
+.venv\Scripts\activate
+
+# 7- para desativar o ambiente virtual:
+deactivate
+
+# 8- para automatizar a ativação do ambiente virtual qdo teclar em [Ctrl] + ['] ou [F5]:
+
+- selecionar na barra de status (inferior) à direita o interpretador Python que deve estar no sub-diretório Scripts do .venv;
+
+- no sub-diretório .vscode, criar os arquivos json:
+
+launch.json
+-----------
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Arquivo Atual",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe"
+    }
+  ]
+}
+
+settings.json
+-------------
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  
+  "python.terminal.activateEnvironment": true,
+  
+  "python.experiments.optOutFrom": [
+    "pythonTerminalEnvVarActivation"
+  ]
+}
+
+------------------------------------------------------------------------------------------------------------------------
+
+Com os arquivos:
+
+launch.json
+-----------
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Arquivo Atual",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "python": "${command:python.interpreterPath}"
+    }
+  ]
+}
+
+
+settings.json
+-------------
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  
+  "python.terminal.activateEnvironment": true,
+  
+  "python.experiments.optOutFrom": [
+    "pythonTerminalEnvVarActivation"
+  ]
+}
+
+está ativando .venv automaticamente com [Ctrl] + ['], mas ainda não está funcionando com [F5].
+
+Resolver.
+
+
+------------------------------------------------------------------------
+
+
+Após criar o ambiente virtual (.venv) na raíz do meu projeto, pelo terminal e ajustar o IDE para usá-lo como interpretador, segui os seguintes passos:
+
+1- criei um diretório .vscode no mesmo diretório que o .venv criado pelo PS; 
+2- criei os dois arquivos json conforme abaixo: 
+
+launch.json
+-----------
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Arquivo Atual",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "python": "${command:python.interpreterPath}"
+    }
+  ]
+}
+
+settings.json
+-------------
+{
+  // Caminho padrão do interpretador Python do projeto (venv local)
+  "python.defaultInterpreterPath": ".venv\\Scripts\\python.exe",
+
+  // Ativa automaticamente o ambiente virtual ao abrir um novo terminal
+  "python.terminal.activateEnvironment": true,
+
+  // Ativa o ambiente no terminal atual (útil ao reabrir com Ctrl+`)
+  "python.terminal.activateEnvironmentInCurrentTerminal": true
+}
+
+3- salvei-os no diretório .vscode
+4- desliguei o Terminal / VSCode;
+5- ativei o Terminal tanto por [F5] como por [Ctrl] + [']; 
+
+--> o ambiente virtual não foi ativado automaticamente;
+
+Resolver.
